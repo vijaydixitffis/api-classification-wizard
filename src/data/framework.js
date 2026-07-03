@@ -151,6 +151,17 @@ export const GOVERNANCE_TIERS = {
   },
 }
 
+// The 7 classification axes (Tab 1) — summarized for the landing page.
+export const AXES = [
+  { name: 'Protocol / Interaction Style', values: 'REST, GraphQL, SOAP, gRPC, Async/Event, WebSocket', drives: 'Gateway CAPABILITIES needed (not tier)' },
+  { name: 'Functional / Architectural Role', values: 'System, Domain, Process, Experience/BFF, Utility', drives: 'Ownership model, reuse expectations, layering' },
+  { name: 'Exposure / Trust Boundary', values: 'Private-to-app, Shared-internal, Partner, Public', drives: 'GATEWAY TIER (dominant driver)' },
+  { name: 'Data Authority', values: 'System of Record, System of Reference, Derived', drives: 'Governance around data ownership & consistency' },
+  { name: 'Data Sensitivity / Regulatory', values: 'Public, Internal, Confidential, Regulated (PII/PHI/PCI)', drives: 'GOVERNANCE INTENSITY, security baseline' },
+  { name: 'Consumer Topology', values: 'Single consumer, Few teams, Many internal, Unbounded external', drives: 'Governance intensity, blast radius' },
+  { name: 'Commercial Model', values: 'None, Chargeback, Partner-contracted, Monetized', drives: 'Governance + edge features (metering, billing)' },
+]
+
 export const PRINCIPLES = [
   { title: 'Layering aligns with exposure', why: 'Deeper layers (System/Domain) sit behind; edge-facing façades (Experience/Partner) sit at the enterprise gateway. Traffic flows edge → platform → app.' },
   { title: 'Never expose an internal-layer API directly externally', why: 'Put a purpose-built façade at the edge. Preserves freedom to refactor internals without breaking external contracts; lets you apply edge-only concerns (metering, WAF, quota plans) in one place.' },

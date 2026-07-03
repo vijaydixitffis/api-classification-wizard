@@ -2,8 +2,8 @@ import {
   SCORE_FACTORS, GOVERNANCE_TIERS, DATA_AUTHORITY_LABELS, PROTOCOL_LABELS, PRINCIPLES,
 } from '../data/framework.js'
 
-const TIER_COLORS = { light: '#2e9e6b', managed: '#d98e04', full: '#c0392b' }
-const GATEWAY_COLORS = { app: '#2e9e6b', platform: '#2471a3', enterprise: '#7d3c98' }
+const TIER_COLORS = { light: '#8fb0dd', managed: '#4f7fc9', full: '#1d4ed8' }
+const GATEWAY_COLORS = { app: '#8fb0dd', platform: '#4f7fc9', enterprise: '#1d4ed8' }
 
 export default function Results({ answers, result, onRestart, onEdit }) {
   const {
@@ -41,7 +41,7 @@ export default function Results({ answers, result, onRestart, onEdit }) {
           <div className="verdict-value">{gateway.label}</div>
           <div className="verdict-sub">{gateway.aka} — sits {gateway.sitsAt.toLowerCase()}</div>
         </div>
-        <div className="verdict-card" style={{ borderTopColor: '#2471a3' }}>
+        <div className="verdict-card" style={{ borderTopColor: '#3b82f6' }}>
           <div className="verdict-label">Governance Score</div>
           <div className="verdict-value big-number">{totalScore}<span className="of"> / 24</span></div>
           <div className="verdict-sub">Sum of 6 rubric factors (each 1–4)</div>

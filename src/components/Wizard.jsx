@@ -1,3 +1,5 @@
+import Icon from './icons.jsx'
+
 export default function Wizard({ questions, answers, setAnswers, stepIndex, setStepIndex, onFinish }) {
   const q = questions[stepIndex]
   const total = questions.length
@@ -88,7 +90,7 @@ export default function Wizard({ questions, answers, setAnswers, stepIndex, setS
         </section>
 
         <aside className="guidance">
-          <div className="guidance-badge">Framework guidance</div>
+          <div className="guidance-badge"><Icon name="lightbulb" size={12} /> Framework guidance</div>
           <h3>{q.guidance.heading}</h3>
           <p>{q.guidance.body}</p>
           {q.guidance.points.length > 0 && (
