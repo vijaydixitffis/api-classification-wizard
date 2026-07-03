@@ -1,11 +1,16 @@
+import { useState } from 'react'
 import {
   SCORE_FACTORS, GOVERNANCE_TIERS, DATA_AUTHORITY_LABELS, PROTOCOL_LABELS, PRINCIPLES,
 } from '../data/framework.js'
+import Icon from './icons.jsx'
+import Modal from './Modal.jsx'
+import DecisionTreeDiagram from './DecisionTreeDiagram.jsx'
 
-const TIER_COLORS = { light: '#8fb0dd', managed: '#4f7fc9', full: '#1d4ed8' }
-const GATEWAY_COLORS = { app: '#8fb0dd', platform: '#4f7fc9', enterprise: '#1d4ed8' }
+const TIER_COLORS = { light: 'var(--tier-1)', managed: 'var(--tier-2)', full: 'var(--tier-3)' }
+const GATEWAY_COLORS = { app: 'var(--tier-1)', platform: 'var(--tier-2)', enterprise: 'var(--tier-3)' }
 
 export default function Results({ answers, result, onRestart, onEdit }) {
+  const [diagramOpen, setDiagramOpen] = useState(false)
   const {
     scores, totalScore, governance, governanceKey, governanceAdjustments,
     gateway, gatewayKey, gatewayReason, escalations, antiPatterns,
@@ -23,11 +28,16 @@ export default function Results({ answers, result, onRestart, onEdit }) {
           {answers.apiDescription && <p className="results-desc">{answers.apiDescription}</p>}
         </div>
         <div className="results-actions">
+          <button className="btn ghost" onClick={() => setDiagramOpen(true)}><Icon name="tree" /> View decision path</button>
           <button className="btn ghost" onClick={onEdit}>← Edit answers</button>
           <button className="btn ghost" onClick={() => window.print()}>Print / PDF</button>
           <button className="btn primary" onClick={onRestart}>Assess another API</button>
         </div>
       </div>
+
+      <Modal open={diagramOpen} onClose={() => setDiagramOpen(false)} title={`Decision path — ${name}`}>
+        <DecisionTreeDiagram result={result} />
+      </Modal>
 
       {/* Verdict cards */}
       <div className="verdict-grid">

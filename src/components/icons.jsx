@@ -53,6 +53,16 @@ const PATHS = {
       <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z" />
     </>
   ),
+  tree: (
+    <>
+      <circle cx="12" cy="4" r="2.5" />
+      <line x1="12" y1="6.5" x2="12" y2="10" />
+      <line x1="12" y1="10" x2="6" y2="15" />
+      <line x1="12" y1="10" x2="18" y2="15" />
+      <circle cx="6" cy="17.5" r="2.5" />
+      <circle cx="18" cy="17.5" r="2.5" />
+    </>
+  ),
 }
 
 export default function Icon({ name, size = 18, strokeWidth = 2, className = '' }) {

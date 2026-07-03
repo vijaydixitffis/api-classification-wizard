@@ -1,12 +1,17 @@
+import { useState } from 'react'
 import {
   AXES, ROLES, EXPOSURE_ROLES, GATEWAY_TIERS, GOVERNANCE_TIERS, PRINCIPLES,
 } from '../data/framework.js'
 import Icon from './icons.jsx'
+import Modal from './Modal.jsx'
+import DecisionTreeDiagram from './DecisionTreeDiagram.jsx'
 
 const TIER_ORDER = ['light', 'managed', 'full']
 const GATEWAY_ORDER = ['app', 'platform', 'enterprise']
 
 export default function Landing({ onStart }) {
+  const [diagramOpen, setDiagramOpen] = useState(false)
+
   return (
     <main className="landing">
       {/* Hero — copy left, stats right */}
@@ -20,6 +25,9 @@ export default function Landing({ onStart }) {
             set of recommendations, with framework guidance at every step.
           </p>
           <button className="btn primary hero-cta" onClick={onStart}>Start the wizard →</button>
+          <button className="btn ghost diagram-trigger" onClick={() => setDiagramOpen(true)}>
+            <Icon name="tree" /> View decision tree diagram
+          </button>
         </div>
         <div className="hero-stats">
           <div className="stat"><span className="stat-num">7</span><span className="stat-label">classification axes</span></div>
@@ -175,6 +183,10 @@ export default function Landing({ onStart }) {
         <p>10–12 guided questions, about 5 minutes, full guidance at every step.</p>
         <button className="btn primary hero-cta" onClick={onStart}>Start the wizard →</button>
       </section>
+
+      <Modal open={diagramOpen} onClose={() => setDiagramOpen(false)} title="How the decision tree works">
+        <DecisionTreeDiagram />
+      </Modal>
     </main>
   )
 }
