@@ -17,7 +17,7 @@ export default function Landing({ onStart }) {
       {/* Hero — copy left, stats right */}
       <section className="hero">
         <div className="hero-main">
-          <h2>Classify any API. Decide its governance. Place it on the right gateway.</h2>
+          <h2>Classify any API. Decide its governance. Place it on the right{' '}gateway.</h2>
           <p>
             There is no single &lsquo;type&rsquo; of API — every API sits at a point across seven independent
             axes. This wizard walks you through them, scores your API against the six-factor governance
@@ -30,11 +30,11 @@ export default function Landing({ onStart }) {
           </button>
         </div>
         <div className="hero-stats">
+          <div className="stat"><span className="stat-num">10–12</span><span className="stat-label">guided questions</span></div>
           <div className="stat"><span className="stat-num">7</span><span className="stat-label">classification axes</span></div>
           <div className="stat"><span className="stat-num">6</span><span className="stat-label">scoring factors</span></div>
           <div className="stat"><span className="stat-num">3</span><span className="stat-label">governance tiers</span></div>
           <div className="stat"><span className="stat-num">3</span><span className="stat-label">gateway tiers</span></div>
-          <div className="stat"><span className="stat-num">10–12</span><span className="stat-label">guided questions</span></div>
         </div>
       </section>
 
