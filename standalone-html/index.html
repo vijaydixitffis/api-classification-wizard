@@ -1,0 +1,1631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>API Classification &amp; Governance Wizard</title>
+<style>
+:root {
+  --brand: #2563eb;
+  --brand-dark: #1e40af;
+  --ink: #1c2833;
+  --ink-soft: #5d6d7e;
+  --line: #e3e8ee;
+  --bg: #f4f7f9;
+  --card: #ffffff;
+  --accent: #3b82f6;
+  --warn-bg: #fdf3e7;
+  --warn-border: #e5b168;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(28, 40, 51, 0.08), 0 8px 24px rgba(28, 40, 51, 0.06);
+  --tier-1: #8fb0dd;
+  --tier-2: #4f7fc9;
+  --tier-3: #1d4ed8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Header */
+.app-header {
+  background: linear-gradient(120deg, var(--brand-dark), var(--brand));
+  color: #fff;
+  padding: 22px 28px;
+}
+.app-header-inner { display: flex; align-items: center; gap: 16px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.logo-mark {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 10px 12px;
+  font-size: 15px;
+  cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center;
+}
+.app-header h1 { margin: 0; font-size: 21px; font-weight: 650; }
+.app-header p { margin: 2px 0 0; font-size: 13.5px; opacity: 0.85; }
+
+.app-footer {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  padding: 18px;
+  margin-top: auto;
+}
+
+/* Wizard layout */
+.wizard { max-width: 1200px; margin: 0 auto; width: 100%; padding: 26px 28px 10px; }
+
+.progress-wrap { margin-bottom: 22px; }
+.progress-labels { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
+.progress-bar { height: 8px; background: #dde5ec; border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand), var(--accent)); border-radius: 99px; transition: width 0.3s ease; }
+.progress-dots { display: flex; gap: 8px; margin-top: 10px; }
+.dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid #c2cdd6; background: #fff; padding: 0; cursor: pointer;
+}
+.dot.done { background: var(--brand); border-color: var(--brand); }
+.dot.current { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(36, 113, 163, 0.25); }
+
+.wizard-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 22px; align-items: start; }
+@media (max-width: 900px) { .wizard-grid { grid-template-columns: 1fr; } }
+
+/* Question card */
+.question-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 26px 28px;
+}
+.question-card h2 { margin: 0 0 6px; font-size: 20px; }
+.subtitle { margin: 0 0 18px; color: var(--ink-soft); font-size: 13.5px; }
+
+.text-inputs { display: flex; flex-direction: column; gap: 12px; }
+.text-inputs input, .text-inputs textarea {
+  font: inherit; padding: 12px 14px;
+  border: 1.5px solid var(--line); border-radius: 8px;
+  outline: none; transition: border-color 0.15s;
+  resize: vertical;
+}
+.text-inputs input:focus, .text-inputs textarea:focus { border-color: var(--brand); }
+
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  display: flex; gap: 12px; align-items: flex-start; text-align: left;
+  background: #fbfcfd; border: 1.5px solid var(--line); border-radius: 10px;
+  padding: 13px 15px; cursor: pointer; font: inherit; transition: all 0.12s ease;
+  width: 100%;
+}
+.option:hover { border-color: var(--brand); background: #f0f5fd; }
+.option.selected { border-color: var(--brand); background: #e9f0fc; box-shadow: 0 0 0 1px var(--brand); }
+.option-radio {
+  flex: none; width: 18px; height: 18px; margin-top: 2px;
+  border: 2px solid #b9c4cd; border-radius: 50%; position: relative;
+}
+.option.selected .option-radio { border-color: var(--brand); }
+.option.selected .option-radio::after {
+  content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--brand);
+}
+.option-body { display: flex; flex-direction: column; gap: 2px; }
+.option-label { font-weight: 600; font-size: 14.5px; }
+.option-hint { font-size: 12.5px; color: var(--ink-soft); }
+
+.nav-buttons { display: flex; justify-content: space-between; margin-top: 22px; }
+.btn {
+  font: inherit; font-weight: 600; font-size: 14px;
+  padding: 10px 20px; border-radius: 8px; cursor: pointer;
+  border: 1.5px solid transparent; transition: all 0.12s;
+}
+.btn.primary { background: var(--brand); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--brand-dark); }
+.btn.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.ghost { background: #fff; border-color: var(--line); color: var(--ink); }
+.btn.ghost:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+.btn.ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Guidance panel */
+.guidance {
+  background: linear-gradient(180deg, #edf3fc, #f7faff);
+  border: 1px solid #cfdef5;
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  position: sticky; top: 20px;
+}
+.guidance-badge {
+  display: inline-flex; align-items: center; gap: 5px; background: var(--brand); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 99px; margin-bottom: 10px;
+}
+.guidance h3 { margin: 0 0 8px; font-size: 15.5px; color: var(--brand-dark); }
+.guidance p { margin: 0 0 10px; font-size: 13.5px; }
+.guidance ul { margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+
+/* Results */
+.results { max-width: 1200px; margin: 0 auto; width: 100%; padding: 26px 28px 10px; }
+.results-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.results-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--brand); }
+.results-header h2 { margin: 2px 0 0; font-size: 26px; }
+.results-desc { margin: 4px 0 0; color: var(--ink-soft); }
+.results-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.verdict-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+@media (max-width: 900px) { .verdict-grid { grid-template-columns: 1fr; } }
+.verdict-card {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  border-top: 5px solid var(--accent); padding: 18px 20px;
+}
+.verdict-label { font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--ink-soft); }
+.verdict-value { font-size: 20px; font-weight: 700; margin: 6px 0 4px; }
+.verdict-value.big-number { font-size: 32px; }
+.verdict-value .of { font-size: 16px; color: var(--ink-soft); font-weight: 500; }
+.verdict-sub { font-size: 12.5px; color: var(--ink-soft); }
+
+.panel {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 22px 24px; margin-bottom: 18px;
+}
+.panel h3 { margin: 0 0 14px; font-size: 17px; }
+.panel h4 { margin: 14px 0 6px; font-size: 14px; }
+.panel.warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
+.panel.muted { background: #f8fafb; }
+
+.score-rows { display: flex; flex-direction: column; gap: 9px; }
+.score-row { display: grid; grid-template-columns: 220px 1fr 220px; gap: 12px; align-items: center; font-size: 13px; }
+@media (max-width: 800px) { .score-row { grid-template-columns: 1fr; gap: 4px; } }
+.score-name { font-weight: 600; }
+.score-track { height: 12px; background: #edf1f5; border-radius: 99px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 99px; }
+.score-fill.s1 { background: #c9d8ef; }
+.score-fill.s2 { background: #8fb0dd; }
+.score-fill.s3 { background: #4f7fc9; }
+.score-fill.s4 { background: #1d4ed8; }
+.score-val { color: var(--ink-soft); }
+
+.band-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.band {
+  font-size: 12px; padding: 4px 12px; border-radius: 99px;
+  background: #eef2f5; color: var(--ink-soft); border: 1.5px solid transparent;
+}
+.band.active { background: #e9f0fc; color: var(--brand-dark); border-color: var(--brand); font-weight: 700; }
+.adjustment { margin: 12px 0 0; font-size: 13.5px; color: #9a5b00; font-weight: 600; }
+
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.profile-item { background: #f8fafb; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.profile-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-soft); }
+.profile-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.role-detail { margin-top: 14px; font-size: 13.5px; background: #f0f5fd; border-left: 3px solid var(--brand); padding: 10px 14px; border-radius: 0 8px 8px 0; }
+.role-detail.exposure { border-left-color: #4f7fc9; background: #edf3fc; }
+
+.reason { font-size: 14px; margin: 0 0 6px; }
+.escalations { margin: 4px 0 0; padding-left: 18px; font-size: 13.5px; display: flex; flex-direction: column; gap: 5px; }
+.defaults-note { margin-top: 14px; font-size: 13px; color: var(--ink-soft); background: #f8fafb; padding: 10px 14px; border-radius: 8px; }
+
+.anti-pattern { border-left: 3px solid #c0392b; padding: 8px 14px; margin-bottom: 12px; background: #fff; border-radius: 0 8px 8px 0; }
+.anti-pattern p { margin: 4px 0; font-size: 13.5px; }
+.anti-pattern .fix span { font-weight: 700; color: #1e40af; }
+
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.rec-card { background: #f8fafb; border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; }
+.rec-card h4 { margin: 0 0 8px; font-size: 14px; color: var(--brand-dark); }
+.rec-card ul { margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+
+.principles { margin: 0; padding-left: 20px; font-size: 13.5px; display: flex; flex-direction: column; gap: 8px; }
+
+@media print {
+  .app-header, .results-actions, .app-footer { display: none; }
+  body { background: #fff; }
+  .panel, .verdict-card { box-shadow: none; border: 1px solid var(--line); break-inside: avoid; }
+  .modal-overlay { display: none; }
+}
+
+/* Landing page */
+.landing { max-width: 1200px; margin: 0 auto; width: 100%; padding: 20px 28px 8px; }
+
+.hero {
+  display: grid; grid-template-columns: 1.7fr 1fr; gap: 30px; align-items: center;
+  padding: 8px 0 22px;
+}
+@media (max-width: 720px) { .hero { grid-template-columns: 1fr; gap: 18px; } .hero-stats { justify-self: start; } }
+.hero h2 { margin: 0 0 10px; font-size: 18px; font-weight: 650; line-height: 1.3; letter-spacing: -0.2px; white-space: nowrap; }
+@media (max-width: 1000px) { .hero h2 { white-space: normal; font-size: 17px; } }
+.hero p { margin: 0 0 16px; color: var(--ink-soft); font-size: 13.5px; }
+.hero-cta { font-size: 15px; padding: 11px 26px; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35); }
+.hero-stats {
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 14px 20px; justify-self: end; min-width: 240px;
+}
+.stat { display: flex; align-items: baseline; gap: 10px; }
+.stat-num { font-size: 20px; font-weight: 750; color: var(--brand); min-width: 52px; text-align: right; }
+.stat-label { font-size: 12.5px; color: var(--ink-soft); }
+
+.section-intro { margin: -2px 0 12px; color: var(--ink-soft); font-size: 13px; max-width: 950px; }
+
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 720px) { .steps-grid { grid-template-columns: 1fr; } }
+.step-card { background: #f8fafb; border: 1px solid var(--line); border-radius: 10px; padding: 13px 16px; }
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--brand); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 10px;
+}
+.step-card h4 { margin: 0 0 6px; font-size: 15px; }
+.step-card p { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+.tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 720px) { .tier-grid { grid-template-columns: 1fr; } }
+.tier-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 15px; background: #fff; border-top: 4px solid; }
+.tier-card.depth-1 { border-top-color: var(--tier-1); }
+.tier-card.depth-2 { border-top-color: var(--tier-2); }
+.tier-card.depth-3 { border-top-color: var(--tier-3); }
+.tier-band {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  background: #e9f0fc; color: var(--brand-dark); padding: 3px 10px; border-radius: 99px; margin-bottom: 8px;
+}
+.tier-card h4 { margin: 0 0 6px; font-size: 15.5px; }
+.tier-aka { margin: 0 0 8px; font-size: 12.5px; color: var(--ink-soft); }
+.tier-card ul { margin: 0; padding-left: 17px; font-size: 12.5px; display: flex; flex-direction: column; gap: 3px; }
+.tier-typical { margin-top: 10px; font-size: 12px; color: var(--ink-soft); font-style: italic; }
+
+.roles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 11px; }
+.role-card { background: #f8fafb; border: 1px solid var(--line); border-radius: 10px; padding: 12px 15px; }
+.role-card.exposure-card { background: #edf3fc; border-color: #cfdef5; }
+.role-card h4 { margin: 0 0 6px; font-size: 14.5px; color: var(--brand-dark); }
+.role-card p { margin: 0 0 8px; font-size: 12.5px; }
+.role-meta { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--ink-soft); }
+.role-defaults { margin-top: 8px; font-size: 11.5px; font-weight: 650; color: var(--brand-dark); }
+
+.axes-table { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.axes-row {
+  display: grid; grid-template-columns: 1.1fr 1.5fr 1.2fr; gap: 14px;
+  padding: 8px 14px; font-size: 12.5px; border-bottom: 1px solid var(--line);
+}
+.axes-row:last-child { border-bottom: none; }
+.axes-row:nth-child(even) { background: #f8fafb; }
+.axes-head {
+  background: var(--brand-dark) !important; color: #fff; font-weight: 700;
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.axis-name { font-weight: 650; }
+@media (max-width: 800px) {
+  .axes-row { grid-template-columns: 1fr; gap: 2px; }
+}
+
+.bottom-cta {
+  text-align: center; background: linear-gradient(120deg, var(--brand-dark), var(--brand));
+  color: #fff; border-radius: var(--radius); padding: 24px 22px; margin-bottom: 16px;
+}
+.bottom-cta h3 { margin: 0 0 4px; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.bottom-cta p { margin: 0 0 14px; opacity: 0.85; font-size: 13px; }
+.bottom-cta .hero-cta { background: #fff; color: var(--brand-dark); }
+.bottom-cta .hero-cta:hover { background: #e9f0fc; }
+
+/* Header adjustments for landing nav */
+.header-home {
+  margin-left: auto; background: rgba(255, 255, 255, 0.12); color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.header-home:hover { background: rgba(255, 255, 255, 0.22); }
+
+/* Icons */
+.icon { flex: none; vertical-align: -3px; }
+.landing .panel h3 { display: flex; align-items: center; gap: 8px; }
+.landing .panel h3 .icon { color: var(--brand); }
+.landing .panel { padding: 16px 20px; margin-bottom: 14px; }
+.landing .panel h3 { margin-bottom: 10px; font-size: 16px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(28, 40, 51, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; z-index: 1000;
+}
+.modal-panel {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  max-width: 960px; width: 100%; max-height: 88vh; overflow-y: auto;
+  padding: 22px 26px; position: relative;
+}
+.modal-panel:focus { outline: none; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; gap: 12px;
+}
+.modal-header h3 { margin: 0; font-size: 17px; }
+.modal-close {
+  background: transparent; border: none; color: var(--ink-soft);
+  font-size: 22px; line-height: 1; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+  flex: none;
+}
+.modal-close:hover { color: var(--brand); background: #f0f5fd; }
+
+.diagram-trigger { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; }
+
+/* Decision tree diagram */
+.diagram-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.diagram-legend-item {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; padding: 4px 12px; border-radius: 99px; background: #eef2f5; color: var(--ink-soft);
+}
+.diagram-legend-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+.diagram-svg { display: block; margin: 0 auto; width: 100%; max-width: 900px; }
+.diagram-svg text { font-family: inherit; fill: var(--ink); }
+.diagram-svg .diagram-label-muted { fill: var(--ink-soft); }
+
+.diagram-node { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
+.diagram-node.active { stroke: var(--brand); stroke-width: 2.5; }
+.diagram-node.terminal { fill: #f8fafb; }
+.diagram-node.terminal.active-app { fill: var(--tier-1); stroke: var(--tier-1); }
+.diagram-node.terminal.active-platform { fill: var(--tier-2); stroke: var(--tier-2); }
+.diagram-node.terminal.active-enterprise,
+.diagram-node.terminal.active-full { fill: var(--tier-3); stroke: var(--tier-3); }
+.diagram-node.terminal.active-app text,
+.diagram-node.terminal.active-platform text,
+.diagram-node.terminal.active-enterprise text,
+.diagram-node.terminal.active-full text { fill: #fff; font-weight: 700; }
+
+.diagram-edge { stroke: var(--line); stroke-width: 1.5; fill: none; }
+.diagram-edge.active { stroke: var(--brand); stroke-width: 2.5; }
+.diagram-edge.escalation { stroke: var(--ink-soft); stroke-dasharray: 4 3; }
+.diagram-edge.escalation.active { stroke: #c0392b; stroke-width: 2; }
+
+.diagram-badge { fill: #c0392b; }
+.diagram-badge-text { fill: #fff; font-size: 10px; font-weight: 700; }
+
+.diagram-meter-segment { stroke: none; }
+.diagram-meter-pointer { fill: var(--ink); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function () {
+'use strict';
+
+// ============================================================
+// DATA (ported verbatim from src/data/framework.js)
+// ============================================================
+
+var ROLES = {
+  system: {
+    label: 'System / Foundation API',
+    definition: 'Thin, stable wrapper over a system of record (mainframe, ERP, core DB, SaaS).',
+    reuse: 'Low — rarely reused broadly, rarely exposed beyond its owning domain',
+    ownsData: 'Yes (System of Record)',
+    governanceFocus: 'Data ownership & stability of the underlying system',
+    example: 'SAP Order-Create wrapper API',
+    usualGateway: 'App or Platform',
+    usualGovernance: 'Tier 2 (Managed) — data-ownership focus',
+    mappingNote: 'Almost never exposed beyond owning domain',
+  },
+  domain: {
+    label: 'Domain API',
+    definition: 'Exposes a business capability aligned to a bounded context. The canonical, reusable enterprise asset.',
+    reuse: "High — the 'product' in an API-as-product model",
+    ownsData: 'Yes / Yes-of-reference',
+    governanceFocus: 'Contract stability, versioning, backward compatibility',
+    example: 'Customer API, Payments API, Inventory API',
+    usualGateway: 'Platform',
+    usualGovernance: 'Tier 2 (Managed)',
+    mappingNote: "The reusable 'product'; front it before any external exposure",
+  },
+  process: {
+    label: 'Process / Orchestrator API',
+    definition: 'Coordinates multiple domains: sagas, long-running workflows, transactional composition.',
+    reuse: 'Medium — reused by multiple process consumers',
+    ownsData: 'No — owns coordination, not data',
+    governanceFocus: 'Idempotency, compensation logic, avoiding cross-domain coupling leakage',
+    example: 'Order Fulfillment Orchestrator',
+    usualGateway: 'Platform',
+    usualGovernance: 'Tier 2 (Managed)',
+    mappingNote: 'Govern idempotency, compensation, coupling',
+  },
+  bff: {
+    label: 'Experience / Facade API (BFF)',
+    definition: 'Channel- or use-case-specific shaping & aggregation for ONE known consumer (mobile app, SPA, a specific partner journey).',
+    reuse: "Low by design — one BFF per experience, owned by that experience's team",
+    ownsData: 'No',
+    governanceFocus: 'Least strict; the anti-pattern is BFF reuse across channels (re-classify as Domain/Process if that happens)',
+    example: 'Mobile-App-Home-Screen BFF',
+    usualGateway: 'App',
+    usualGovernance: 'Tier 3 (Light)',
+    mappingNote: 'One per consumer; a shared BFF is an anti-pattern → re-classify',
+  },
+  utility: {
+    label: 'Utility / Shared API',
+    definition: 'Cross-cutting capability: notification, document generation, auth, audit, feature flags.',
+    reuse: 'High',
+    ownsData: 'No',
+    governanceFocus: 'Reliability & reuse governance similar to Domain APIs',
+    example: 'Notification Service API',
+    usualGateway: 'Platform',
+    usualGovernance: 'Tier 2 (Managed)',
+    mappingNote: 'High reuse → treat like Domain',
+  },
+};
+
+var EXPOSURE_ROLES = {
+  partner: {
+    label: 'Partner API (exposure, not a role)',
+    definition: 'A Facade or Process API deliberately exposed to a named external business partner via contract.',
+    governanceFocus: 'Contractual SLA, partner onboarding, quota plans, security review',
+    usualGateway: 'Enterprise (edge)',
+    usualGovernance: 'Tier 1 (Full)',
+    mappingNote: 'Contract, quota plans, partner onboarding',
+  },
+  public: {
+    label: 'Public / External Customer API (exposure, not a role)',
+    definition: 'A Facade API exposed to unbounded or self-service external developers/customers.',
+    governanceFocus: 'Full design authority review, legal/compliance, developer portal, monetization',
+    usualGateway: 'Enterprise (edge)',
+    usualGovernance: 'Tier 1 (Full)',
+    mappingNote: 'WAF, developer portal, SLA, often monetized',
+  },
+};
+
+var PROTOCOL_NOTES = {
+  rest: 'REST is the baseline style; all gateway tiers support it natively. Focus review on resource modelling and versioning strategy.',
+  graphql: 'GraphQL needs query-depth limiting and field-level authorization at the gateway. Choose a gateway product at your tier that supports GraphQL policies.',
+  soap: 'SOAP often needs a REST façade at the edge. Verify the gateway can mediate SOAP or plan a façade layer.',
+  grpc: 'gRPC needs HTTP/2-aware routing. Verify the gateway at your tier supports HTTP/2 and gRPC pass-through or transcoding.',
+  async: 'Async/Event (webhooks, Kafka, AMQP) requires AsyncAPI specification instead of OpenAPI, and event-gateway or webhook-management capability at your tier.',
+  websocket: 'WebSocket/Streaming needs long-lived connection support and connection-level rate limiting at the gateway.',
+};
+
+var GATEWAY_TIERS = {
+  app: {
+    label: 'App-Level Gateway',
+    aka: 'Micro-gateway, sidecar, in-cluster ingress',
+    sitsAt: 'Inside the product/app boundary',
+    scope: 'One team / one product',
+    capabilities: ['Local routing', 'Service auth (mTLS)', 'Basic rate limiting', 'Per-service policy'],
+  },
+  platform: {
+    label: 'Platform-Level Gateway',
+    aka: 'Domain / LOB / business-unit gateway',
+    sitsAt: 'Between teams, still internal',
+    scope: 'A domain or line of business',
+    capabilities: ['Internal discovery', 'Token translation', 'Cross-team rate limiting', 'Internal SLO enforcement', 'East-west traffic management'],
+  },
+  enterprise: {
+    label: 'Enterprise-Level Gateway',
+    aka: 'Edge / north-south gateway, full API Management (APIM)',
+    sitsAt: 'At the enterprise perimeter',
+    scope: 'Whole organization + external world',
+    capabilities: ['WAF', 'DDoS/bot protection', 'Developer portal', 'Partner onboarding', 'Monetization/metering', 'External SLA enforcement', 'Quota/plan management'],
+  },
+};
+
+var GOVERNANCE_TIERS = {
+  light: {
+    label: 'Tier 3: Light / Self-Service',
+    band: '6 – 10',
+    controls: ['Naming + security baseline conformance', 'Catalog registration', 'Team-owned versioning'],
+    typicalRoles: 'Experience/BFF, App-internal utility APIs',
+  },
+  managed: {
+    label: 'Tier 2: Managed',
+    band: '11 – 16',
+    controls: ['Design review vs. standards', 'Mandatory OpenAPI/AsyncAPI spec', 'Deprecation policy with notice windows', 'SLO + observability', 'Backward-compatibility rules'],
+    typicalRoles: 'Domain, Process/Orchestrator, Shared/Utility APIs',
+  },
+  full: {
+    label: 'Tier 1: Full / Controlled',
+    band: '17 – 24',
+    controls: ['Formal design authority sign-off', 'Security & privacy review', 'Contract testing', 'Formal SLA', 'Staged deprecation with partner comms', 'Change advisory', 'Legal/compliance gate'],
+    typicalRoles: 'Partner APIs, Public/External Customer APIs',
+  },
+};
+
+var AXES = [
+  { name: 'Protocol / Interaction Style', values: 'REST, GraphQL, SOAP, gRPC, Async/Event, WebSocket', drives: 'Gateway CAPABILITIES needed (not tier)' },
+  { name: 'Functional / Architectural Role', values: 'System, Domain, Process, Experience/BFF, Utility', drives: 'Ownership model, reuse expectations, layering' },
+  { name: 'Exposure / Trust Boundary', values: 'Private-to-app, Shared-internal, Partner, Public', drives: 'GATEWAY TIER (dominant driver)' },
+  { name: 'Data Authority', values: 'System of Record, System of Reference, Derived', drives: 'Governance around data ownership & consistency' },
+  { name: 'Data Sensitivity / Regulatory', values: 'Public, Internal, Confidential, Regulated (PII/PHI/PCI)', drives: 'GOVERNANCE INTENSITY, security baseline' },
+  { name: 'Consumer Topology', values: 'Single consumer, Few teams, Many internal, Unbounded external', drives: 'Governance intensity, blast radius' },
+  { name: 'Commercial Model', values: 'None, Chargeback, Partner-contracted, Monetized', drives: 'Governance + edge features (metering, billing)' },
+];
+
+var PRINCIPLES = [
+  { title: 'Layering aligns with exposure', why: 'Deeper layers (System/Domain) sit behind; edge-facing façades (Experience/Partner) sit at the enterprise gateway. Traffic flows edge → platform → app.' },
+  { title: 'Never expose an internal-layer API directly externally', why: 'Put a purpose-built façade at the edge. Preserves freedom to refactor internals without breaking external contracts; lets you apply edge-only concerns (metering, WAF, quota plans) in one place.' },
+  { title: 'A shared BFF is not a BFF', why: 'If two channels depend on it, split it or promote it to a governed Domain/Process API and re-score its governance tier upward.' },
+  { title: 'Governance follows the operating model, not just the API', why: 'Gateway tier tells you WHERE policy is enforced; the operating model tells you WHO sets it. Use federated governance: central authority owns standards, teams execute autonomously.' },
+  { title: 'Protocol dictates gateway capability, not tier', why: "Choose gateway products per tier that support the protocols present at that tier (GraphQL, gRPC, SOAP, async) — but don't let protocol change the placement decision." },
+];
+
+var QUESTIONS = [
+  {
+    id: 'apiName', type: 'text',
+    title: 'What is the API called?',
+    subtitle: 'Give the API a name and a one-line description so the assessment report reads well.',
+    placeholder: 'e.g. Customer Profile API',
+    guidance: {
+      heading: 'Key principle from the framework',
+      body: "There is no single 'type' of API. Every API sits at a point across multiple independent axes — protocol, functional role, exposure, data authority, sensitivity, consumer topology, commercial model. This wizard walks you through all of them. Gateway tier is driven mainly by the EXPOSURE axis; governance intensity is driven by a weighted combination of all axes.",
+      points: [],
+    },
+  },
+  {
+    id: 'protocol', type: 'choice',
+    title: 'What protocol / interaction style does the API use?',
+    subtitle: 'Axis 1 of 7 — drives the gateway CAPABILITIES needed, not the tier.',
+    options: [
+      { value: 'rest', label: 'REST', hint: 'Resource-oriented HTTP/JSON — the enterprise baseline.' },
+      { value: 'graphql', label: 'GraphQL', hint: 'Client-shaped queries; needs query-depth & field-level authz.' },
+      { value: 'soap', label: 'SOAP', hint: 'XML web services; often fronted by a REST façade at the edge.' },
+      { value: 'grpc', label: 'gRPC', hint: 'Binary HTTP/2 RPC; needs HTTP/2-aware routing.' },
+      { value: 'async', label: 'Async / Event', hint: 'Webhooks, Kafka, AMQP — document with AsyncAPI.' },
+      { value: 'websocket', label: 'WebSocket / Streaming', hint: 'Long-lived bidirectional connections.' },
+    ],
+    guidance: {
+      heading: 'Protocol dictates gateway capability, not tier',
+      body: 'A common review mistake is assigning governance tier from protocol (e.g. "all GraphQL APIs are Tier 1"). The framework flags that as an anti-pattern — protocol only tells you what the gateway product must support.',
+      points: [
+        'GraphQL needs query-depth limits and field-level authorization.',
+        'gRPC needs HTTP/2-aware routing.',
+        'SOAP often needs a REST façade at the edge.',
+        'Async/Event APIs are specified with AsyncAPI rather than OpenAPI.',
+      ],
+    },
+  },
+  {
+    id: 'role', type: 'choice',
+    title: 'What functional / architectural role does the API play?',
+    subtitle: 'Axis 2 of 7 — drives ownership model, reuse expectations, and layering.',
+    options: [
+      { value: 'system', label: 'System / Foundation', hint: 'Thin wrapper over a system of record (ERP, mainframe, core DB, SaaS).' },
+      { value: 'domain', label: 'Domain', hint: 'A business capability in a bounded context — the reusable enterprise asset.' },
+      { value: 'process', label: 'Process / Orchestrator', hint: 'Coordinates multiple domains: sagas, workflows, composition.' },
+      { value: 'bff', label: 'Experience / Facade (BFF)', hint: 'Channel-specific shaping for ONE known consumer.' },
+      { value: 'utility', label: 'Utility / Shared', hint: 'Cross-cutting capability: notifications, documents, auth, audit, flags.' },
+    ],
+    guidance: {
+      heading: 'Role is what the API does — not who consumes it',
+      body: "Exposure (who consumes it) is a SEPARATE axis you'll answer next. A 'Partner API' or 'Public API' is usually a Facade or Process API deliberately placed at the edge — not a distinct role. Pick the role by function.",
+      points: [
+        'System / Foundation — owns system-of-record data; governance focuses on data ownership and stability. Example: SAP Order-Create wrapper.',
+        'Domain — the canonical reusable product; governance focuses on contract stability, versioning, backward compatibility. Example: Customer API, Payments API.',
+        'Process / Orchestrator — owns coordination, not data; govern idempotency and compensation logic. Example: Order Fulfillment Orchestrator.',
+        'Experience / BFF — one per experience, owned by that experience team; least strict governance. Example: Mobile-App-Home-Screen BFF.',
+        'Utility / Shared — high reuse; govern like a Domain API. Example: Notification Service API.',
+      ],
+    },
+  },
+  {
+    id: 'bffShared', type: 'choice',
+    condition: function (a) { return a.role === 'bff'; },
+    title: 'Is this BFF consumed by more than one channel or experience team?',
+    subtitle: 'Anti-pattern check — a shared BFF is not a BFF.',
+    options: [
+      { value: 'no', label: 'No — exactly one channel', hint: 'One experience, one owning team. A true BFF.' },
+      { value: 'yes', label: 'Yes — multiple channels depend on it', hint: 'Two or more channels/experience teams consume it today.' },
+    ],
+    guidance: {
+      heading: 'A shared BFF is not a BFF',
+      body: 'If two channels depend on it, the framework says: split it into channel-specific BFFs, or formally promote it to a governed Domain/Process API and re-score its governance tier upward. Single-consumer BFFs may stay lightly governed even if functionally complex.',
+      points: [
+        'Recommended fix: split into channel-specific BFFs, or re-classify as Domain/Process with Tier 2 governance.',
+        'If you answer Yes, the wizard will flag the anti-pattern and raise the recommended governance accordingly.',
+      ],
+    },
+  },
+  {
+    id: 'dataAuthority', type: 'choice',
+    title: 'What is the data authority of this API?',
+    subtitle: 'Axis 4 of 7 — drives governance around data ownership & consistency.',
+    options: [
+      { value: 'sor', label: 'System of Record', hint: 'The authoritative master source of this data.' },
+      { value: 'reference', label: 'System of Reference / read-model', hint: 'A synchronized copy or read-optimized projection.' },
+      { value: 'derived', label: 'Derived / aggregated', hint: 'Computed, combined, or analytical views over other sources.' },
+    ],
+    guidance: {
+      heading: 'Why data authority matters',
+      body: 'System-of-record APIs need stricter change control than derived or aggregated views — a breaking change at the source ripples through every downstream copy and projection.',
+      points: [
+        'System of Record → strictest change control and schema stewardship.',
+        'System of Reference → governance focuses on freshness/consistency contracts.',
+        'Derived/aggregated → lightest data governance; changes are contained.',
+      ],
+    },
+  },
+  {
+    id: 'exposure', type: 'choice', scoreKey: 'exposure',
+    title: 'Who sits across the trust boundary — what is the exposure?',
+    subtitle: 'Axis 3 of 7 — the DOMINANT driver of gateway tier. Rubric factor 1 of 6.',
+    options: [
+      { value: 1, label: 'Private-to-app', hint: 'Consumed only inside one product/app boundary. (Score 1)' },
+      { value: 2, label: 'Shared-internal (platform)', hint: 'Consumed across teams/domains, still inside the enterprise. (Score 2)' },
+      { value: 3, label: 'Partner (B2B)', hint: 'Named external business partners under contract. (Score 3)' },
+      { value: 4, label: 'Public / External', hint: 'Unbounded or self-service external developers/customers. (Score 4)' },
+    ],
+    guidance: {
+      heading: 'The single strongest signal',
+      body: 'Exposure is the single strongest signal for where an API must be registered. The gateway decision tree starts here: any consumer OUTSIDE the enterprise trust boundary (partner or public) makes the Enterprise (edge) gateway mandatory.',
+      points: [
+        'Partner or Public → Enterprise gateway, fronted by a purpose-built façade, with WAF, quota plans, developer portal, formal SLA.',
+        'Shared-internal across multiple teams → Platform gateway (cross-team discoverability, token translation).',
+        "Private-to-app → App/micro-gateway; don't burden a single-consumer API with enterprise policy.",
+        'Never expose an internal-layer API (System/Domain) directly externally — always front it with a façade at the edge.',
+      ],
+    },
+  },
+  {
+    id: 'directExternal', type: 'choice',
+    condition: function (a) { return Number(a.exposure) >= 3 && (a.role === 'system' || a.role === 'domain'); },
+    title: 'Is this internal-layer API directly addressable by the partner/public consumer?',
+    subtitle: 'Anti-pattern check — internal layers must not be reachable from outside.',
+    options: [
+      { value: 'no', label: 'No — a purpose-built façade fronts it', hint: 'External consumers only ever see the façade at the edge.' },
+      { value: 'yes', label: 'Yes — externals hit it directly', hint: 'The System/Domain API itself is reachable from outside.' },
+    ],
+    guidance: {
+      heading: 'Never expose an internal-layer API directly externally',
+      body: 'A System or Domain API directly addressable by a partner or the public internet is a flagged anti-pattern. Front it with a purpose-built façade at the Enterprise gateway and keep the internal API private.',
+      points: [
+        'A façade preserves freedom to refactor internals without breaking external contracts.',
+        'Edge-only concerns (metering, WAF, quota plans) get applied in one place.',
+      ],
+    },
+  },
+  {
+    id: 'consumerCount', type: 'choice', scoreKey: 'consumerCount',
+    title: 'What does the consumer topology look like?',
+    subtitle: 'Axis 6 of 7 — drives governance intensity and blast radius. Rubric factor 2 of 6.',
+    options: [
+      { value: 1, label: 'Single known consumer', hint: 'Exactly one consumer, e.g. the BFF pattern. (Score 1)' },
+      { value: 2, label: 'Few internal teams', hint: 'A handful of known internal teams. (Score 2)' },
+      { value: 3, label: 'Many internal consumers', hint: 'Broad internal reuse across the organization. (Score 3)' },
+      { value: 4, label: 'Unbounded external', hint: 'Self-service external consumers you cannot enumerate. (Score 4)' },
+    ],
+    guidance: {
+      heading: 'Consumer topology sets the blast radius baseline',
+      body: 'Single-consumer APIs (like BFFs) can stay lightly governed even if functionally complex. As the consumer set grows, discoverability, versioning discipline, and deprecation notice windows all become mandatory.',
+      points: [
+        'Being consumed across multiple internal teams is the trigger for Platform-gateway registration in the decision tree.',
+        'Unbounded external consumers require a developer portal and formal deprecation with public notice.',
+      ],
+    },
+  },
+  {
+    id: 'dataSensitivity', type: 'choice', scoreKey: 'dataSensitivity',
+    title: 'What is the highest sensitivity of data the API carries?',
+    subtitle: 'Axis 5 of 7 — drives GOVERNANCE INTENSITY and the security baseline. Rubric factor 3 of 6.',
+    options: [
+      { value: 1, label: 'Public', hint: 'Already publishable — no harm if disclosed. (Score 1)' },
+      { value: 2, label: 'Internal', hint: 'Business-internal, non-sensitive. (Score 2)' },
+      { value: 3, label: 'Confidential', hint: 'Commercially sensitive; restricted audience. (Score 3)' },
+      { value: 4, label: 'Regulated (PII / PHI / PCI)', hint: 'Personal, health, or payment-card data under regulation. (Score 4)' },
+    ],
+    guidance: {
+      heading: 'Regulated data escalates everything',
+      body: 'Regulated data (PII/PHI/PCI) crossing a boundary can force edge registration and legal/compliance review even for partner-only traffic. The framework flags "regulated data through a lightly-governed API" as an anti-pattern that must be escalated to Tier 1 governance regardless of consumer count.',
+      points: [
+        'Score 4 here triggers the escalation factors on the results page.',
+        'Security & privacy review plus a legal/compliance gate become mandatory controls.',
+      ],
+    },
+  },
+  {
+    id: 'blastRadius', type: 'choice', scoreKey: 'blastRadius',
+    title: 'What is the breaking-change blast radius?',
+    subtitle: 'If you shipped a breaking change tomorrow, how bad is it? Rubric factor 4 of 6.',
+    options: [
+      { value: 1, label: 'Low', hint: 'One consumer, coordinated release — easy to fix. (Score 1)' },
+      { value: 2, label: 'Medium', hint: 'A few teams need notice and migration time. (Score 2)' },
+      { value: 3, label: 'High', hint: 'Many downstream consumers; costly coordinated migration. (Score 3)' },
+      { value: 4, label: 'Critical', hint: 'Business-critical flows or external contracts break. (Score 4)' },
+    ],
+    guidance: {
+      heading: 'Blast radius is an escalation factor',
+      body: 'High blast radius (many downstream consumers, breaking-change risk) escalates gateway placement to at least Platform tier even if the exposure answer alone would allow App tier.',
+      points: [
+        'High/Critical → backward-compatibility rules, deprecation policy with notice windows, and contract testing become key controls.',
+      ],
+    },
+  },
+  {
+    id: 'sla', type: 'choice', scoreKey: 'sla',
+    title: 'What contractual SLA does the API carry?',
+    subtitle: 'Rubric factor 5 of 6.',
+    options: [
+      { value: 1, label: 'None', hint: 'Best-effort; no formal commitment. (Score 1)' },
+      { value: 2, label: 'Internal OLA', hint: 'Operational-level agreement between internal teams. (Score 2)' },
+      { value: 3, label: 'Partner contract', hint: 'A named partner holds a contractual SLA. (Score 3)' },
+      { value: 4, label: 'Public SLA + legal', hint: 'Published SLA with legal exposure. (Score 4)' },
+    ],
+    guidance: {
+      heading: 'SLA formality drives operational governance',
+      body: 'The stronger the commitment, the more formal the controls: SLO monitoring and observability for internal OLAs, escalating to formal SLA enforcement at the edge gateway, staged deprecation with partner communications, and change advisory for contracted consumers.',
+      points: [],
+    },
+  },
+  {
+    id: 'commercialModel', type: 'choice', scoreKey: 'commercialModel',
+    title: 'What is the commercial model?',
+    subtitle: 'Axis 7 of 7 — drives governance plus edge features (metering, billing). Rubric factor 6 of 6.',
+    options: [
+      { value: 1, label: 'None', hint: 'No money changes hands. (Score 1)' },
+      { value: 2, label: 'Internal chargeback', hint: 'Internal cost allocation between departments. (Score 2)' },
+      { value: 3, label: 'Partner-contracted / metered', hint: 'Usage metered under a partner contract. (Score 3)' },
+      { value: 4, label: 'Monetized / metered product', hint: 'Sold as a product with plans and billing. (Score 4)' },
+    ],
+    guidance: {
+      heading: 'Monetization forces the Enterprise tier',
+      body: 'Any monetization or metering requirement forces the Enterprise-tier gateway — only the edge APIM has plans, quotas, and billing capability. A monetized API registered only at Platform tier is a flagged anti-pattern.',
+      points: [
+        'Metering/billing cannot be retrofitted at App or Platform tiers.',
+      ],
+    },
+  },
+];
+
+var SCORE_FACTORS = [
+  { key: 'exposure', label: 'Exposure', levels: ['Private-to-app', 'Shared internal', 'Partner', 'Public'] },
+  { key: 'consumerCount', label: 'Consumer Count', levels: ['Single', 'Few teams', 'Many internal', 'Unbounded external'] },
+  { key: 'dataSensitivity', label: 'Data Sensitivity', levels: ['Public', 'Internal', 'Confidential', 'Regulated (PII/PHI/PCI)'] },
+  { key: 'blastRadius', label: 'Breaking-Change Blast Radius', levels: ['Low', 'Medium', 'High', 'Critical'] },
+  { key: 'sla', label: 'Contractual SLA', levels: ['None', 'Internal OLA', 'Partner contract', 'Public SLA + legal'] },
+  { key: 'commercialModel', label: 'Commercial Model', levels: ['None', 'Chargeback', 'Partner-metered', 'Monetized'] },
+];
+
+var DATA_AUTHORITY_LABELS = { sor: 'System of Record', reference: 'System of Reference / read-model', derived: 'Derived / aggregated' };
+var PROTOCOL_LABELS = { rest: 'REST', graphql: 'GraphQL', soap: 'SOAP', grpc: 'gRPC', async: 'Async / Event', websocket: 'WebSocket / Streaming' };
+
+// ============================================================
+// ENGINE (ported byte-identical from src/logic/engine.js)
+// ============================================================
+
+function num(v) { return Number(v) || 0; }
+
+function assess(answers) {
+  var scores = {};
+  SCORE_FACTORS.forEach(function (f) { scores[f.key] = num(answers[f.key]); });
+  var totalScore = Object.keys(scores).reduce(function (sum, k) { return sum + scores[k]; }, 0);
+
+  // --- Governance tier from score bands (Tab 5) ---
+  var baseGovernanceKey = totalScore <= 10 ? 'light' : totalScore <= 16 ? 'managed' : 'full';
+  var governanceKey = baseGovernanceKey;
+  var governanceAdjustments = [];
+
+  // --- Gateway tier from the decision tree (Tab 4) ---
+  var gatewayKey, gatewayReason;
+  if (scores.exposure >= 3) {
+    gatewayKey = 'enterprise';
+    gatewayReason = 'A consumer sits OUTSIDE the enterprise trust boundary (partner or public) — decision tree step 1 makes the Enterprise (edge) gateway mandatory.';
+  } else if (scores.exposure === 2 || scores.consumerCount >= 2) {
+    gatewayKey = 'platform';
+    gatewayReason = 'Consumed across multiple internal teams or domains — decision tree step 2 places it behind the Platform gateway for cross-team discoverability and token translation.';
+  } else {
+    gatewayKey = 'app';
+    gatewayReason = "Consumed only within one team/product — decision tree step 3 keeps it at the App/micro-gateway. Don't burden a single-consumer API with enterprise policy.";
+  }
+
+  // --- Escalation factors (Tab 4) ---
+  var escalations = [];
+  var order = ['app', 'platform', 'enterprise'];
+  function raiseGateway(min, reason) {
+    if (order.indexOf(gatewayKey) < order.indexOf(min)) {
+      gatewayKey = min;
+      escalations.push(reason);
+    }
+  }
+
+  if (scores.dataSensitivity === 4 && scores.exposure >= 2) {
+    raiseGateway('enterprise', 'Regulated data (PII/PHI/PCI) crossing a boundary — often forces an edge-registered gateway even for partner-only traffic.');
+  }
+  if (scores.commercialModel >= 3) {
+    raiseGateway('enterprise', 'Monetization / metering required — only the edge APIM has plans and billing capability.');
+  }
+  if (scores.blastRadius >= 3) {
+    raiseGateway('platform', 'High blast radius (many downstream consumers, breaking-change risk) — escalate at least to Platform tier.');
+  }
+
+  // --- Anti-pattern detection (Tab 7) ---
+  var antiPatterns = [];
+  if (scores.dataSensitivity === 4 && baseGovernanceKey === 'light') {
+    governanceKey = 'full';
+    governanceAdjustments.push('Raised to Tier 1 (Full): regulated data must never flow through a Tier 3 (Light) governed API — escalate regardless of consumer count.');
+    raiseGateway('enterprise', 'Regulated data on a lightly-scored API — route through the Enterprise gateway regardless of consumer count (anti-pattern 3 fix).');
+    antiPatterns.push({
+      title: 'Regulated data through a lightly-governed API',
+      detail: 'The rubric score alone landed this API in Tier 3 (Light), but it carries regulated (PII/PHI/PCI) data.',
+      fix: 'Escalate to Tier 1 governance and route through the Enterprise gateway regardless of consumer count.',
+    });
+  } else if (scores.dataSensitivity === 4 && governanceKey === 'managed') {
+    governanceAdjustments.push('Note: regulated data means security & privacy review and a legal/compliance gate should be added on top of the standard Tier 2 controls.');
+  }
+  if (answers.directExternal === 'yes') {
+    antiPatterns.push({
+      title: 'Internal-layer API directly addressable externally',
+      detail: 'A System or Domain API is directly reachable by a partner or the public internet.',
+      fix: 'Front it with a purpose-built façade at the Enterprise gateway; keep the internal API private.',
+    });
+  }
+  if (answers.role === 'bff' && answers.bffShared === 'yes') {
+    antiPatterns.push({
+      title: 'Shared BFF — a shared BFF is not a BFF',
+      detail: 'This BFF is consumed by more than one channel/experience team.',
+      fix: 'Split into channel-specific BFFs, or formally promote and re-classify it as a Domain/Process API with Tier 2 governance.',
+    });
+    if (governanceKey === 'light') {
+      governanceKey = 'managed';
+      governanceAdjustments.push('Raised from Tier 3 (Light) to Tier 2 (Managed): a shared BFF must be promoted to a governed Domain/Process API.');
+    }
+  }
+  if (scores.commercialModel >= 3 && gatewayKey !== 'enterprise') {
+    antiPatterns.push({
+      title: 'Monetized API below Enterprise tier',
+      detail: 'A monetized/metered API is registered below the Enterprise gateway.',
+      fix: 'Move to Enterprise tier — only the edge APIM supports plans, quotas, and billing.',
+    });
+  }
+
+  // --- Effective classification (Tab 2 / Tab 6) ---
+  var role = ROLES[answers.role];
+  var exposureRole = null;
+  if (scores.exposure === 3) exposureRole = EXPOSURE_ROLES.partner;
+  if (scores.exposure === 4) exposureRole = EXPOSURE_ROLES.public;
+
+  // --- Recommendations ---
+  var recommendations = buildRecommendations({ answers: answers, scores: scores, governanceKey: governanceKey, gatewayKey: gatewayKey, role: role, exposureRole: exposureRole, antiPatterns: antiPatterns });
+
+  // Compare against the consolidated-mapping defaults (Tab 6)
+  var defaults = exposureRole
+    ? { gateway: exposureRole.usualGateway, governance: exposureRole.usualGovernance, note: exposureRole.mappingNote }
+    : role
+      ? { gateway: role.usualGateway, governance: role.usualGovernance, note: role.mappingNote }
+      : null;
+
+  return {
+    scores: scores,
+    totalScore: totalScore,
+    governance: GOVERNANCE_TIERS[governanceKey],
+    governanceKey: governanceKey,
+    governanceAdjustments: governanceAdjustments,
+    gateway: GATEWAY_TIERS[gatewayKey],
+    gatewayKey: gatewayKey,
+    gatewayReason: gatewayReason,
+    escalations: escalations,
+    antiPatterns: antiPatterns,
+    role: role,
+    exposureRole: exposureRole,
+    defaults: defaults,
+    protocolNote: PROTOCOL_NOTES[answers.protocol],
+    recommendations: recommendations,
+  };
+}
+
+function buildRecommendations(args) {
+  var answers = args.answers, scores = args.scores, governanceKey = args.governanceKey, gatewayKey = args.gatewayKey, role = args.role, exposureRole = args.exposureRole, antiPatterns = args.antiPatterns;
+  var recs = [];
+
+  var gw = GATEWAY_TIERS[gatewayKey];
+  recs.push({
+    category: 'Gateway & Registration',
+    items: [
+      'Register the API behind the ' + gw.label + ' (' + gw.aka + ').',
+      'Ensure the gateway at this tier provides: ' + gw.capabilities.join(', ') + '.',
+    ].concat(gatewayKey === 'enterprise'
+      ? ['External traffic should traverse Enterprise → Platform → App gateways in sequence; "placement" means the highest tier at which the API is registered and governed.']
+      : []),
+  });
+
+  var gov = GOVERNANCE_TIERS[governanceKey];
+  recs.push({ category: 'Governance Controls', items: gov.controls.map(function (c) { return c + '.'; }) });
+
+  if (role) {
+    var items = ['Governance focus for a ' + role.label + ': ' + role.governanceFocus + '.'];
+    if (answers.role === 'system') items.push('Keep it behind its owning domain — System/Foundation APIs are almost never exposed beyond it. Apply strict change control: it wraps a system of record.');
+    if (answers.role === 'domain') items.push('Treat it as a product: contract stability, semantic versioning, and backward compatibility are the core disciplines. Front it with a façade before any external exposure.');
+    if (answers.role === 'process') items.push('Review idempotency and compensation logic explicitly, and watch for cross-domain coupling leaking through the orchestration contract.');
+    if (answers.role === 'bff') items.push('Keep exactly one BFF per experience, owned by that experience team. If a second channel wants it, split or promote it.');
+    if (answers.role === 'utility') items.push('High reuse means Domain-grade reliability expectations: publish SLOs and manage deprecations like a Domain API.');
+    recs.push({ category: 'Role-Specific Guidance', items: items });
+  }
+
+  if (exposureRole) {
+    recs.push({
+      category: 'External Exposure',
+      items: [
+        exposureRole.label + ': ' + exposureRole.definition,
+        'Edge concerns to put in place: ' + exposureRole.governanceFocus + '.',
+        'Never expose the internal-layer API directly — the façade preserves freedom to refactor internals without breaking external contracts.',
+      ],
+    });
+  }
+
+  if (answers.dataAuthority === 'sor') {
+    recs.push({ category: 'Data Governance', items: ['This API fronts a System of Record — apply stricter change control than derived/aggregated views, with schema stewardship and coordinated migration for breaking changes.'] });
+  } else if (answers.dataAuthority === 'reference') {
+    recs.push({ category: 'Data Governance', items: ['System of Reference / read-model — document freshness and consistency guarantees in the contract so consumers know how stale data can be.'] });
+  }
+
+  recs.push({ category: 'Protocol Capabilities', items: [PROTOCOL_NOTES[answers.protocol], 'Remember: protocol dictates gateway capability, not tier — do not let protocol change the placement or governance decision.'] });
+
+  if (scores.dataSensitivity === 4) {
+    recs.push({ category: 'Security & Compliance', items: [
+      'Regulated data (PII/PHI/PCI): mandatory security & privacy review and a legal/compliance gate before go-live.',
+      'Confirm data-residency and audit-logging requirements with compliance; regulated data can force edge registration even for partner-only traffic.',
+    ] });
+  } else if (scores.dataSensitivity === 3) {
+    recs.push({ category: 'Security & Compliance', items: ['Confidential data: enforce the security baseline (authn/authz on every route, TLS everywhere) and restrict discovery/catalog visibility to authorized audiences.'] });
+  }
+
+  if (antiPatterns.length) {
+    recs.push({ category: 'Remediation (Anti-Patterns Found)', items: antiPatterns.map(function (ap) { return ap.title + ' — ' + ap.fix; }) });
+  }
+
+  return recs;
+}
+
+// ============================================================
+// ICONS (ported from src/components/icons.jsx)
+// ============================================================
+
+var ICON_PATHS = {
+  network: '<circle cx="5" cy="12" r="2.5"></circle><circle cx="19" cy="5" r="2.5"></circle><circle cx="19" cy="19" r="2.5"></circle><line x1="7.3" y1="10.9" x2="16.8" y2="6.1"></line><line x1="7.3" y1="13.1" x2="16.8" y2="17.9"></line>',
+  route: '<circle cx="6" cy="19" r="3"></circle><circle cx="18" cy="5" r="3"></circle><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H12"></path>',
+  shield: '<path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10z"></path>',
+  layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline>',
+  box: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect>',
+  compass: '<circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>',
+  zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
+  lightbulb: '<path d="M9 18h6M10 22h4"></path><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"></path>',
+  tree: '<circle cx="12" cy="4" r="2.5"></circle><line x1="12" y1="6.5" x2="12" y2="10"></line><line x1="12" y1="10" x2="6" y2="15"></line><line x1="12" y1="10" x2="18" y2="15"></line><circle cx="6" cy="17.5" r="2.5"></circle><circle cx="18" cy="17.5" r="2.5"></circle>',
+};
+
+function icon(name, opts) {
+  opts = opts || {};
+  var size = opts.size || 18;
+  var strokeWidth = opts.strokeWidth || 2;
+  var className = opts.className || '';
+  return '<svg class="icon ' + className + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + strokeWidth + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON_PATHS[name] || '') + '</svg>';
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+// ============================================================
+// STATE
+// ============================================================
+
+var state = { view: 'landing', answers: {}, stepIndex: 0 };
+
+function activeQuestions() {
+  return QUESTIONS.filter(function (q) { return !q.condition || q.condition(state.answers); });
+}
+
+function isAnswered(q) {
+  var v = state.answers[q.id];
+  return v !== undefined && v !== '';
+}
+
+function currentStepIndex() {
+  var qs = activeQuestions();
+  return Math.min(state.stepIndex, qs.length - 1);
+}
+
+// ============================================================
+// DECISION TREE DIAGRAM (ported from src/components/DecisionTreeDiagram.jsx)
+// ============================================================
+
+var DIAG_G0 = { x: 60, y: 30, w: 220, h: 46 };
+var DIAG_G1 = { x: 60, y: 110, w: 220, h: 46 };
+var DIAG_TERMINALS = {
+  app: { x: 60, y: 210, w: 150, h: 60, label: 'App' },
+  platform: { x: 250, y: 210, w: 150, h: 60, label: 'Platform' },
+  enterprise: { x: 440, y: 210, w: 150, h: 60, label: 'Enterprise' },
+};
+var DIAG_ESCALATIONS = {
+  regulated: { x: 680, y: 30, w: 220, h: 46, label: 'Regulated data + exposure ≥ 2', target: 'enterprise', channelY: 284 },
+  monetized: { x: 680, y: 90, w: 220, h: 46, label: 'Commercial model ≥ 3 (monetized)', target: 'enterprise', channelY: 290 },
+  blastRadius: { x: 680, y: 150, w: 220, h: 46, label: 'Blast radius ≥ 3', target: 'platform', channelY: 296 },
+};
+var DIAG_METER = { x: 60, y: 300, w: 800, h: 24 };
+var DIAG_BANDS = [
+  { key: 'light', frac: 5 / 19, range: '6–10', label: 'Tier 3 – Light' },
+  { key: 'managed', frac: 6 / 19, range: '11–16', label: 'Tier 2 – Managed' },
+  { key: 'full', frac: 8 / 19, range: '17–24', label: 'Tier 1 – Full' },
+];
+var DIAG_GOV_BOX_Y = 350;
+var DIAG_GOV_BOX_H = 70;
+
+function diagBandLayout() {
+  var x = DIAG_METER.x;
+  return DIAG_BANDS.map(function (b) {
+    var w = DIAG_METER.w * b.frac;
+    var box = { key: b.key, frac: b.frac, range: b.range, label: b.label, x: x, w: w };
+    x += w;
+    return box;
+  });
+}
+
+function dcx(n) { return n.x + n.w / 2; }
+function dcy(n) { return n.y + n.h / 2; }
+function dBottomMid(n) { return [dcx(n), n.y + n.h]; }
+
+function diagSplitLabel(label) {
+  if (label.length <= 26) return [label];
+  var mid = label.lastIndexOf(' ', 26) === -1 ? label.indexOf(' ') : label.lastIndexOf(' ', 26);
+  return [label.slice(0, mid), label.slice(mid + 1)];
+}
+
+function diagDecisionNode(node, active, lines) {
+  var y = dcy(node) + (lines.length > 1 ? -4 : 4);
+  var tspans = lines.map(function (line, i) {
+    return '<tspan x="' + dcx(node) + '" dy="' + (i === 0 ? 0 : 14) + '">' + escapeHtml(line) + '</tspan>';
+  }).join('');
+  return '<g><rect class="diagram-node' + (active ? ' active' : '') + '" x="' + node.x + '" y="' + node.y + '" width="' + node.w + '" height="' + node.h + '" rx="8"></rect>' +
+    '<text x="' + dcx(node) + '" y="' + y + '" text-anchor="middle" font-size="12" font-weight="' + (active ? 700 : 500) + '">' + tspans + '</text></g>';
+}
+
+function diagTerminalBox(node, tierKey, active, title) {
+  return '<g><rect class="diagram-node terminal' + (active ? ' active-' + tierKey : '') + '" x="' + node.x + '" y="' + node.y + '" width="' + node.w + '" height="' + node.h + '" rx="8"><title>' + escapeHtml(title) + '</title></rect>' +
+    '<text x="' + dcx(node) + '" y="' + (dcy(node) + 5) + '" text-anchor="middle" font-size="13">' + escapeHtml(node.label) + '</text></g>';
+}
+
+function diagEscalationBox(node, active) {
+  var lines = diagSplitLabel(node.label);
+  var texts = lines.map(function (line, i) {
+    return '<text x="' + dcx(node) + '" y="' + (dcy(node) - 4 + i * 13) + '" text-anchor="middle" font-size="10.5" class="' + (active ? '' : 'diagram-label-muted') + '">' + escapeHtml(line) + '</text>';
+  }).join('');
+  var badge = active
+    ? '<g transform="translate(' + (node.x + node.w - 16) + ', ' + (node.y - 4) + ')"><circle class="diagram-badge" r="8"></circle><text class="diagram-badge-text" text-anchor="middle" y="3">✓</text></g>'
+    : '';
+  return '<g><rect class="diagram-node' + (active ? ' active' : '') + '" x="' + node.x + '" y="' + node.y + '" width="' + node.w + '" height="' + node.h + '" rx="8"></rect>' + texts + badge + '</g>';
+}
+
+function renderDiagram(result) {
+  var dynamic = !!result;
+  var scores = dynamic ? result.scores : null;
+  var gatewayKey = dynamic ? result.gatewayKey : null;
+  var governanceKey = dynamic ? result.governanceKey : null;
+  var totalScore = dynamic ? result.totalScore : null;
+
+  var step1Taken = dynamic && scores.exposure >= 3;
+  var step2Taken = dynamic && !step1Taken && (scores.exposure === 2 || scores.consumerCount >= 2);
+  var step3Taken = dynamic && !step1Taken && !step2Taken;
+
+  var escalationActive = {
+    regulated: dynamic && scores.dataSensitivity === 4 && scores.exposure >= 2,
+    monetized: dynamic && scores.commercialModel >= 3,
+    blastRadius: dynamic && scores.blastRadius >= 3,
+  };
+
+  var antiOverrideActive = dynamic && totalScore <= 10 && scores.dataSensitivity === 4 && governanceKey === 'full';
+
+  var bands = diagBandLayout();
+  var pointerX = dynamic
+    ? Math.min(DIAG_METER.x + DIAG_METER.w, Math.max(DIAG_METER.x, DIAG_METER.x + ((totalScore - 6) / 18) * DIAG_METER.w))
+    : null;
+
+  var g0Bot = dBottomMid(DIAG_G0), g1Bot = dBottomMid(DIAG_G1);
+  var entC = { x: dcx(DIAG_TERMINALS.enterprise), top: DIAG_TERMINALS.enterprise.y };
+  var platC = { x: dcx(DIAG_TERMINALS.platform), top: DIAG_TERMINALS.platform.y };
+  var appC = { x: dcx(DIAG_TERMINALS.app), top: DIAG_TERMINALS.app.y };
+
+  var legend = dynamic
+    ? '<span class="diagram-legend-item"><span class="diagram-legend-swatch" style="background:var(--brand)"></span> Path taken</span>' +
+      '<span class="diagram-legend-item"><span class="diagram-legend-swatch" style="background:var(--line)"></span> Not taken</span>' +
+      '<span class="diagram-legend-item"><span class="diagram-legend-swatch" style="background:#c0392b"></span> Escalation fired</span>'
+    : '<span class="diagram-legend-item"><span class="diagram-legend-swatch" style="background:var(--line)"></span> Decision step</span>' +
+      '<span class="diagram-legend-item"><span class="diagram-legend-swatch" style="background:var(--ink-soft)"></span> Escalation factor (can raise the tier)</span>' +
+      '<span class="diagram-legend-item"><span class="diagram-legend-swatch" style="background:var(--tier-3)"></span> Terminal tier</span>';
+
+  var edges = '';
+  edges += '<path class="diagram-edge' + (step2Taken || step3Taken ? ' active' : '') + '" d="M' + g0Bot[0] + ',' + g0Bot[1] + ' L' + g1Bot[0] + ',' + DIAG_G1.y + '"></path>';
+  edges += '<path class="diagram-edge' + (step1Taken ? ' active' : '') + '" d="M' + (DIAG_G0.x + DIAG_G0.w) + ',' + dcy(DIAG_G0) + ' L' + entC.x + ',' + dcy(DIAG_G0) + ' L' + entC.x + ',' + entC.top + '"></path>';
+  edges += '<path class="diagram-edge' + (step2Taken ? ' active' : '') + '" d="M' + (DIAG_G1.x + DIAG_G1.w) + ',' + dcy(DIAG_G1) + ' L' + platC.x + ',' + dcy(DIAG_G1) + ' L' + platC.x + ',' + platC.top + '"></path>';
+  edges += '<path class="diagram-edge' + (step3Taken ? ' active' : '') + '" d="M' + g1Bot[0] + ',' + g1Bot[1] + ' L' + appC.x + ',' + g1Bot[1] + ' L' + appC.x + ',' + appC.top + '"></path>';
+
+  var labels = '';
+  labels += '<text x="' + (DIAG_G0.x + DIAG_G0.w + 14) + '" y="' + (dcy(DIAG_G0) - 8) + '" font-size="10.5" class="diagram-label-muted">Yes</text>';
+  labels += '<text x="' + (g0Bot[0] + 8) + '" y="' + ((g0Bot[1] + DIAG_G1.y) / 2 + 4) + '" font-size="10.5" class="diagram-label-muted">No</text>';
+  labels += '<text x="' + (DIAG_G1.x + DIAG_G1.w + 14) + '" y="' + (dcy(DIAG_G1) - 8) + '" font-size="10.5" class="diagram-label-muted">Yes</text>';
+  labels += '<text x="' + (appC.x + 8) + '" y="' + (g1Bot[1] + 12) + '" font-size="10.5" class="diagram-label-muted">No</text>';
+
+  var nodes = diagDecisionNode(DIAG_G0, dynamic, ['Exposure ≥ 3', '(Partner / Public)?']) +
+    diagDecisionNode(DIAG_G1, dynamic && !step1Taken, ['Exposure = 2 or', '≥2 team consumers?']);
+
+  var terminals = diagTerminalBox(DIAG_TERMINALS.app, 'app', gatewayKey === 'app', GATEWAY_TIERS.app.label) +
+    diagTerminalBox(DIAG_TERMINALS.platform, 'platform', gatewayKey === 'platform', GATEWAY_TIERS.platform.label) +
+    diagTerminalBox(DIAG_TERMINALS.enterprise, 'enterprise', gatewayKey === 'enterprise', GATEWAY_TIERS.enterprise.label);
+
+  var escEdges = '';
+  Object.keys(DIAG_ESCALATIONS).forEach(function (key) {
+    var esc = DIAG_ESCALATIONS[key];
+    var target = DIAG_TERMINALS[esc.target];
+    var bot = dBottomMid(esc);
+    var targetX = dcx(target);
+    escEdges += '<path class="diagram-edge escalation' + (escalationActive[key] ? ' active' : '') + '" d="M' + bot[0] + ',' + bot[1] + ' L' + bot[0] + ',' + esc.channelY + ' L' + targetX + ',' + esc.channelY + ' L' + targetX + ',' + (target.y + target.h) + '"></path>';
+  });
+
+  var escBoxes = diagEscalationBox(DIAG_ESCALATIONS.regulated, escalationActive.regulated) +
+    diagEscalationBox(DIAG_ESCALATIONS.monetized, escalationActive.monetized) +
+    diagEscalationBox(DIAG_ESCALATIONS.blastRadius, escalationActive.blastRadius);
+
+  var overrideEdge = '';
+  if (!dynamic || antiOverrideActive) {
+    var full = bands.filter(function (b) { return b.key === 'full'; })[0];
+    var fullBoxCx = full.x + full.w / 2;
+    var bot = dBottomMid(DIAG_ESCALATIONS.regulated);
+    overrideEdge = '<path class="diagram-edge escalation' + (antiOverrideActive ? ' active' : '') + '" d="M' + bot[0] + ',' + bot[1] + ' L910,' + bot[1] + ' L910,330 L' + fullBoxCx + ',330 L' + fullBoxCx + ',' + DIAG_GOV_BOX_Y + '"></path>';
+  }
+
+  var meterSegments = bands.map(function (b) {
+    var fill = b.key === 'light' ? 'var(--tier-1)' : b.key === 'managed' ? 'var(--tier-2)' : 'var(--tier-3)';
+    var opacity = dynamic && governanceKey !== b.key ? 0.35 : 1;
+    return '<rect class="diagram-meter-segment" x="' + b.x + '" y="' + DIAG_METER.y + '" width="' + b.w + '" height="' + DIAG_METER.h + '" fill="' + fill + '" opacity="' + opacity + '"></rect>';
+  }).join('');
+
+  var meterLabels = bands.map(function (b) {
+    return '<text x="' + (b.x + b.w / 2) + '" y="' + (DIAG_METER.y + DIAG_METER.h / 2 + 4) + '" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">' + b.range + '</text>';
+  }).join('');
+
+  var pointer = '';
+  if (dynamic && pointerX !== null) {
+    pointer += '<polygon class="diagram-meter-pointer" points="' + (pointerX - 7) + ',' + (DIAG_METER.y - 12) + ' ' + (pointerX + 7) + ',' + (DIAG_METER.y - 12) + ' ' + pointerX + ',' + (DIAG_METER.y - 1) + '"></polygon>';
+    pointer += '<text x="' + pointerX + '" y="' + (DIAG_METER.y - 16) + '" text-anchor="middle" font-size="11" font-weight="700">' + totalScore + '</text>';
+  }
+
+  var govBoxes = bands.map(function (b) {
+    var active = governanceKey === b.key;
+    return '<g><rect class="diagram-node terminal' + (active ? ' active-' + b.key : '') + '" x="' + b.x + '" y="' + DIAG_GOV_BOX_Y + '" width="' + b.w + '" height="' + DIAG_GOV_BOX_H + '" rx="8"><title>' + escapeHtml(GOVERNANCE_TIERS[b.key].label) + '</title></rect>' +
+      '<text x="' + (b.x + b.w / 2) + '" y="' + (DIAG_GOV_BOX_Y + DIAG_GOV_BOX_H / 2 + 5) + '" text-anchor="middle" font-size="13">' + b.label + '</text></g>';
+  }).join('');
+
+  return '<div><div class="diagram-legend">' + legend + '</div>' +
+    '<svg class="diagram-svg" viewBox="0 0 940 560">' + edges + labels + nodes + terminals + escEdges + escBoxes + overrideEdge + meterSegments + meterLabels + pointer + govBoxes + '</svg></div>';
+}
+
+// ============================================================
+// VIEWS
+// ============================================================
+
+function renderHeader() {
+  var homeBtn = state.view !== 'landing' ? '<button class="btn header-home" data-action="go-home">Framework overview</button>' : '';
+  return '<header class="app-header"><div class="app-header-inner">' +
+    '<button class="logo-mark" data-action="go-home" title="Back to overview">' + icon('network', { size: 24, strokeWidth: 1.8 }) + '</button>' +
+    '<div><h1>API Classification &amp; Governance Wizard</h1><p>Classify any API, score its governance intensity, and place it on the right gateway tier</p></div>' +
+    homeBtn +
+    '</div></header>';
+}
+
+function renderFooter() {
+  return '<footer class="app-footer">Based on the API Classification &amp; Governance Framework — 7 classification axes · 3 gateway tiers · 6-factor governance scoring rubric</footer>';
+}
+
+var TIER_ORDER = ['light', 'managed', 'full'];
+var GATEWAY_ORDER = ['app', 'platform', 'enterprise'];
+
+function renderLanding() {
+  var tierCards = TIER_ORDER.map(function (key, i) {
+    var t = GOVERNANCE_TIERS[key];
+    var controls = t.controls.map(function (c) { return '<li>' + escapeHtml(c) + '</li>'; }).join('');
+    return '<div class="tier-card depth-' + (i + 1) + '"><div class="tier-band">Score ' + t.band + '</div><h4>' + escapeHtml(t.label) + '</h4><ul>' + controls + '</ul><div class="tier-typical">Typical: ' + escapeHtml(t.typicalRoles) + '</div></div>';
+  }).join('');
+
+  var gatewayCards = GATEWAY_ORDER.map(function (key, i) {
+    var g = GATEWAY_TIERS[key];
+    var caps = g.capabilities.map(function (c) { return '<li>' + escapeHtml(c) + '</li>'; }).join('');
+    return '<div class="tier-card depth-' + (i + 1) + '"><div class="tier-band">' + escapeHtml(g.scope) + '</div><h4>' + escapeHtml(g.label) + '</h4><p class="tier-aka">' + escapeHtml(g.aka) + ' — sits ' + escapeHtml(g.sitsAt.toLowerCase()) + '</p><ul>' + caps + '</ul></div>';
+  }).join('');
+
+  var roleCards = Object.keys(ROLES).map(function (key) {
+    var r = ROLES[key];
+    return '<div class="role-card"><h4>' + escapeHtml(r.label) + '</h4><p>' + escapeHtml(r.definition) + '</p>' +
+      '<div class="role-meta"><span><strong>Reuse:</strong> ' + escapeHtml(r.reuse) + '</span><span><strong>Owns data:</strong> ' + escapeHtml(r.ownsData) + '</span><span><strong>Example:</strong> ' + escapeHtml(r.example) + '</span></div>' +
+      '<div class="role-defaults">Usual: ' + escapeHtml(r.usualGateway) + ' gateway · ' + escapeHtml(r.usualGovernance) + '</div></div>';
+  }).join('') + Object.keys(EXPOSURE_ROLES).map(function (key) {
+    var r = EXPOSURE_ROLES[key];
+    return '<div class="role-card exposure-card"><h4>' + escapeHtml(r.label) + '</h4><p>' + escapeHtml(r.definition) + '</p>' +
+      '<div class="role-meta"><span><strong>Focus:</strong> ' + escapeHtml(r.governanceFocus) + '</span></div>' +
+      '<div class="role-defaults">Usual: ' + escapeHtml(r.usualGateway) + ' gateway · ' + escapeHtml(r.usualGovernance) + '</div></div>';
+  }).join('');
+
+  var axesRows = AXES.map(function (a) {
+    return '<div class="axes-row"><span class="axis-name">' + escapeHtml(a.name) + '</span><span>' + escapeHtml(a.values) + '</span><span>' + escapeHtml(a.drives) + '</span></div>';
+  }).join('');
+
+  var principlesList = PRINCIPLES.map(function (p) {
+    return '<li><strong>' + escapeHtml(p.title) + '.</strong> ' + escapeHtml(p.why) + '</li>';
+  }).join('');
+
+  return '<main class="landing">' +
+    '<section class="hero"><div class="hero-main">' +
+    '<h2>Classify any API. Decide its governance. Place it on the right gateway.</h2>' +
+    '<p>There is no single ‘type’ of API — every API sits at a point across seven independent axes. This wizard walks you through them, scores your API against the six-factor governance rubric, applies the gateway decision tree with its escalation factors, and hands you a full set of recommendations, with framework guidance at every step.</p>' +
+    '<button class="btn primary hero-cta" data-action="start-wizard">Start the wizard →</button>' +
+    '<button class="btn ghost diagram-trigger" data-action="open-diagram">' + icon('tree') + ' View decision tree diagram</button>' +
+    '</div><div class="hero-stats">' +
+    '<div class="stat"><span class="stat-num">10–12</span><span class="stat-label">guided questions</span></div>' +
+    '<div class="stat"><span class="stat-num">7</span><span class="stat-label">classification axes</span></div>' +
+    '<div class="stat"><span class="stat-num">6</span><span class="stat-label">scoring factors</span></div>' +
+    '<div class="stat"><span class="stat-num">3</span><span class="stat-label">governance tiers</span></div>' +
+    '<div class="stat"><span class="stat-num">3</span><span class="stat-label">gateway tiers</span></div>' +
+    '</div></section>' +
+
+    '<section class="panel"><h3>' + icon('route') + ' How the assessment works</h3><div class="steps-grid">' +
+    '<div class="step-card"><div class="step-num">1</div><h4>Answer guided questions</h4><p>Tag your API on all seven axes — protocol, role, exposure, data authority, sensitivity, consumer topology, commercial model — with the framework\'s guidance beside every question.</p></div>' +
+    '<div class="step-card"><div class="step-num">2</div><h4>Get scored &amp; classified</h4><p>Six factors are scored 1–4 and summed (6–24). The score band sets the governance tier; the decision tree — driven mainly by exposure — sets the gateway tier, plus escalation factors.</p></div>' +
+    '<div class="step-card"><div class="step-num">3</div><h4>Receive recommendations</h4><p>A full report: required controls, gateway capabilities, role-specific guidance, security &amp; compliance actions, and any anti-patterns with recommended fixes. Printable as PDF.</p></div>' +
+    '</div></section>' +
+
+    '<section class="panel"><h3>' + icon('shield') + ' What is a Governance Tier?</h3>' +
+    '<p class="section-intro">Governance intensity is how much rigor an API\'s lifecycle demands — reviews, specs, SLAs, deprecation discipline. Each of the six rubric factors (exposure, consumer count, data sensitivity, blast radius, contractual SLA, commercial model) is scored 1–4, and the total maps to one of three tiers.</p>' +
+    '<div class="tier-grid">' + tierCards + '</div></section>' +
+
+    '<section class="panel"><h3>' + icon('layers') + ' What is a Gateway Tier?</h3>' +
+    '<p class="section-intro">The gateway tier is <strong>where</strong> an API must be registered and policy enforced. Tiers are layered, not exclusive — external traffic traverses Enterprise → Platform → App in sequence, and ‘placement’ means the highest tier at which the API is governed. The dominant driver is the<strong> exposure axis</strong>; escalation factors (regulated data, monetization, high blast radius) can raise the tier further.</p>' +
+    '<div class="tier-grid">' + gatewayCards + '</div></section>' +
+
+    '<section class="panel"><h3>' + icon('box') + ' Which API types are covered?</h3>' +
+    '<p class="section-intro">The framework classifies APIs by their functional role — what they do architecturally. Partner and Public APIs are not separate roles: they are Facade or Process APIs deliberately exposed across the trust boundary.</p>' +
+    '<div class="roles-grid">' + roleCards + '</div></section>' +
+
+    '<section class="panel"><h3>' + icon('grid') + ' The 7 classification axes</h3>' +
+    '<p class="section-intro">Every API is tagged on ALL of these axes. They combine — no single axis alone determines governance or gateway placement.</p>' +
+    '<div class="axes-table"><div class="axes-row axes-head"><span>Axis</span><span>Values</span><span>Primarily drives</span></div>' + axesRows + '</div></section>' +
+
+    '<section class="panel muted"><h3>' + icon('compass') + ' The design principles behind the framework</h3><ol class="principles">' + principlesList + '</ol></section>' +
+
+    '<section class="bottom-cta"><h3>' + icon('zap', { size: 20 }) + ' Ready to classify your API?</h3><p>10–12 guided questions, about 5 minutes, full guidance at every step.</p>' +
+    '<button class="btn primary hero-cta" data-action="start-wizard">Start the wizard →</button></section>' +
+    '</main>';
+}
+
+function renderWizard() {
+  var qs = activeQuestions();
+  var idx = currentStepIndex();
+  var q = qs[idx];
+  var total = qs.length;
+  var answered = isAnswered(q);
+  var isLast = idx === total - 1;
+
+  var dots = qs.map(function (question, i) {
+    var done = state.answers[question.id] !== undefined && state.answers[question.id] !== '';
+    var cls = 'dot' + (i === idx ? ' current' : '') + (done ? ' done' : '');
+    return '<button class="' + cls + '" data-action="goto-step" data-index="' + i + '" title="' + escapeHtml(question.title) + '" aria-label="Go to question ' + (i + 1) + '"></button>';
+  }).join('');
+
+  var body;
+  if (q.type === 'text') {
+    body = '<div class="text-inputs">' +
+      '<input type="text" data-field="apiName" value="' + escapeHtml(state.answers.apiName || '') + '" placeholder="' + escapeHtml(q.placeholder) + '" autofocus>' +
+      '<textarea rows="2" data-field="apiDescription" placeholder="Optional one-line description of what the API does">' + escapeHtml(state.answers.apiDescription || '') + '</textarea>' +
+      '</div>';
+  } else {
+    var opts = q.options.map(function (opt) {
+      var selected = state.answers[q.id] === opt.value;
+      return '<button role="radio" aria-checked="' + selected + '" class="option' + (selected ? ' selected' : '') + '" data-action="select-option" data-qid="' + q.id + '" data-value="' + escapeHtml(String(opt.value)) + '">' +
+        '<span class="option-radio" aria-hidden="true"></span>' +
+        '<span class="option-body"><span class="option-label">' + escapeHtml(opt.label) + '</span><span class="option-hint">' + escapeHtml(opt.hint) + '</span></span>' +
+        '</button>';
+    }).join('');
+    body = '<div class="options" role="radiogroup" aria-label="' + escapeHtml(q.title) + '">' + opts + '</div>';
+  }
+
+  var points = q.guidance.points.length > 0
+    ? '<ul>' + q.guidance.points.map(function (p) { return '<li>' + escapeHtml(p) + '</li>'; }).join('') + '</ul>'
+    : '';
+
+  return '<main class="wizard">' +
+    '<div class="progress-wrap">' +
+    '<div class="progress-labels"><span>Question ' + (idx + 1) + ' of ' + total + '</span><span>' + Math.round((idx / total) * 100) + '% complete</span></div>' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + ((idx / total) * 100) + '%"></div></div>' +
+    '<div class="progress-dots">' + dots + '</div>' +
+    '</div>' +
+    '<div class="wizard-grid">' +
+    '<section class="question-card"><h2>' + escapeHtml(q.title) + '</h2><p class="subtitle">' + escapeHtml(q.subtitle) + '</p>' +
+    body +
+    '<div class="nav-buttons"><button class="btn ghost" data-action="wizard-back"' + (idx === 0 ? ' disabled' : '') + '>← Back</button>' +
+    '<button class="btn primary" data-action="wizard-next"' + (!answered ? ' disabled' : '') + '>' + (isLast ? 'Classify this API →' : 'Next →') + '</button></div>' +
+    '</section>' +
+    '<aside class="guidance"><div class="guidance-badge">' + icon('lightbulb', { size: 12 }) + ' Framework guidance</div>' +
+    '<h3>' + escapeHtml(q.guidance.heading) + '</h3><p>' + escapeHtml(q.guidance.body) + '</p>' + points + '</aside>' +
+    '</div></main>';
+}
+
+function profileItem(label, value) {
+  return '<div class="profile-item"><div class="profile-label">' + escapeHtml(label) + '</div><div class="profile-value">' + escapeHtml(value == null ? '—' : value) + '</div></div>';
+}
+
+function renderResults() {
+  var result = assess(state.answers);
+  var scores = result.scores, totalScore = result.totalScore, governance = result.governance, governanceKey = result.governanceKey,
+    governanceAdjustments = result.governanceAdjustments, gateway = result.gateway, gatewayKey = result.gatewayKey,
+    gatewayReason = result.gatewayReason, escalations = result.escalations, antiPatterns = result.antiPatterns,
+    role = result.role, exposureRole = result.exposureRole, defaults = result.defaults, recommendations = result.recommendations;
+
+  var name = (state.answers.apiName || '').trim() || 'Unnamed API';
+  var TIER_COLORS = { light: 'var(--tier-1)', managed: 'var(--tier-2)', full: 'var(--tier-3)' };
+  var GATEWAY_COLORS = { app: 'var(--tier-1)', platform: 'var(--tier-2)', enterprise: 'var(--tier-3)' };
+
+  var scoreRows = SCORE_FACTORS.map(function (f) {
+    var v = scores[f.key];
+    return '<div class="score-row"><div class="score-name">' + escapeHtml(f.label) + '</div>' +
+      '<div class="score-track"><div class="score-fill s' + v + '" style="width:' + ((v / 4) * 100) + '%"></div></div>' +
+      '<div class="score-val">' + v + ' — ' + escapeHtml(f.levels[v - 1]) + '</div></div>';
+  }).join('');
+
+  var bandLegend = Object.keys(GOVERNANCE_TIERS).map(function (key) {
+    var t = GOVERNANCE_TIERS[key];
+    return '<span class="band' + (key === governanceKey ? ' active' : '') + '">' + t.band + ' → ' + escapeHtml(t.label) + '</span>';
+  }).join('');
+
+  var adjustments = governanceAdjustments.map(function (a) { return '<p class="adjustment">⚠ ' + escapeHtml(a) + '</p>'; }).join('');
+
+  var profileGrid =
+    profileItem('Protocol / Interaction Style', PROTOCOL_LABELS[state.answers.protocol]) +
+    profileItem('Functional / Architectural Role', role ? role.label : null) +
+    profileItem('Exposure / Trust Boundary', SCORE_FACTORS[0].levels[scores.exposure - 1]) +
+    profileItem('Data Authority', DATA_AUTHORITY_LABELS[state.answers.dataAuthority]) +
+    profileItem('Data Sensitivity', SCORE_FACTORS[2].levels[scores.dataSensitivity - 1]) +
+    profileItem('Consumer Topology', SCORE_FACTORS[1].levels[scores.consumerCount - 1]) +
+    profileItem('Commercial Model', SCORE_FACTORS[5].levels[scores.commercialModel - 1]);
+
+  var roleDetail = role
+    ? '<div class="role-detail"><strong>' + escapeHtml(role.label) + '</strong> — ' + escapeHtml(role.definition) + ' <em>Example: ' + escapeHtml(role.example) + '.</em></div>'
+    : '';
+  var exposureDetail = exposureRole
+    ? '<div class="role-detail exposure"><strong>' + escapeHtml(exposureRole.label) + '</strong> — ' + escapeHtml(exposureRole.definition) + '</div>'
+    : '';
+
+  var escalationsBlock = escalations.length > 0
+    ? '<h4>Escalation factors applied</h4><ul class="escalations">' + escalations.map(function (e) { return '<li>' + escapeHtml(e) + '</li>'; }).join('') + '</ul>'
+    : '';
+
+  var defaultsNote = defaults
+    ? '<p class="defaults-note">Consolidated-mapping default for this classification: <strong>' + escapeHtml(defaults.gateway) + '</strong> gateway, <strong>' + escapeHtml(defaults.governance) + '</strong>. ' + escapeHtml(defaults.note) + '. Defaults are a starting point — escalation factors above override them.</p>'
+    : '';
+
+  var antiPatternsSection = antiPatterns.length > 0
+    ? '<section class="panel warning"><h3>⚠ Anti-patterns detected (' + antiPatterns.length + ')</h3>' +
+      antiPatterns.map(function (ap) {
+        return '<div class="anti-pattern"><strong>' + escapeHtml(ap.title) + '</strong><p>' + escapeHtml(ap.detail) + '</p><p class="fix"><span>Recommended fix:</span> ' + escapeHtml(ap.fix) + '</p></div>';
+      }).join('') + '</section>'
+    : '';
+
+  var recGrid = recommendations.map(function (rec) {
+    return '<div class="rec-card"><h4>' + escapeHtml(rec.category) + '</h4><ul>' + rec.items.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('') + '</ul></div>';
+  }).join('');
+
+  var principlesList = PRINCIPLES.map(function (p) { return '<li><strong>' + escapeHtml(p.title) + '.</strong> ' + escapeHtml(p.why) + '</li>'; }).join('');
+
+  var descBlock = state.answers.apiDescription ? '<p class="results-desc">' + escapeHtml(state.answers.apiDescription) + '</p>' : '';
+
+  return '<main class="results">' +
+    '<div class="results-header"><div><div class="results-eyebrow">Assessment complete</div><h2>' + escapeHtml(name) + '</h2>' + descBlock + '</div>' +
+    '<div class="results-actions">' +
+    '<button class="btn ghost" data-action="open-diagram">' + icon('tree') + ' View decision path</button>' +
+    '<button class="btn ghost" data-action="edit-answers">← Edit answers</button>' +
+    '<button class="btn ghost" data-action="print">Print / PDF</button>' +
+    '<button class="btn primary" data-action="start-wizard">Assess another API</button>' +
+    '</div></div>' +
+
+    '<div class="verdict-grid">' +
+    '<div class="verdict-card" style="border-top-color:' + TIER_COLORS[governanceKey] + '"><div class="verdict-label">Governance Tier</div><div class="verdict-value">' + escapeHtml(governance.label) + '</div><div class="verdict-sub">Score band ' + governance.band + ' · Typical for: ' + escapeHtml(governance.typicalRoles) + '</div></div>' +
+    '<div class="verdict-card" style="border-top-color:' + GATEWAY_COLORS[gatewayKey] + '"><div class="verdict-label">Gateway Tier</div><div class="verdict-value">' + escapeHtml(gateway.label) + '</div><div class="verdict-sub">' + escapeHtml(gateway.aka) + ' — sits ' + escapeHtml(gateway.sitsAt.toLowerCase()) + '</div></div>' +
+    '<div class="verdict-card" style="border-top-color:#3b82f6"><div class="verdict-label">Governance Score</div><div class="verdict-value big-number">' + totalScore + '<span class="of"> / 24</span></div><div class="verdict-sub">Sum of 6 rubric factors (each 1–4)</div></div>' +
+    '</div>' +
+
+    '<section class="panel"><h3>Score breakdown</h3><div class="score-rows">' + scoreRows + '</div>' +
+    '<div class="band-legend">' + bandLegend + '</div>' + adjustments + '</section>' +
+
+    '<section class="panel"><h3>Classification profile — the 7 axes</h3><div class="profile-grid">' + profileGrid + '</div>' + roleDetail + exposureDetail + '</section>' +
+
+    '<section class="panel"><h3>Why this gateway tier</h3><p class="reason">' + escapeHtml(gatewayReason) + '</p>' + escalationsBlock + defaultsNote + '</section>' +
+
+    antiPatternsSection +
+
+    '<section class="panel"><h3>Full recommendations</h3><div class="rec-grid">' + recGrid + '</div></section>' +
+
+    '<section class="panel muted"><h3>Design principles to carry into review</h3><ol class="principles">' + principlesList + '</ol></section>' +
+    '</main>';
+}
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+
+function currentViewHTML() {
+  if (state.view === 'landing') return renderLanding();
+  if (state.view === 'wizard') return renderWizard();
+  return renderResults();
+}
+
+function render() {
+  document.getElementById('root').innerHTML = renderHeader() + currentViewHTML() + renderFooter();
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+
+var modalEl = null;
+var previousOverflow = '';
+var onModalKeydown = null;
+
+function openModal(title, bodyHTML) {
+  previousOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = '<div class="modal-panel" tabindex="-1" role="dialog" aria-modal="true" aria-label="' + escapeHtml(title) + '">' +
+    '<div class="modal-header"><h3>' + escapeHtml(title) + '</h3><button class="modal-close" data-action="close-modal" aria-label="Close">×</button></div>' +
+    '<div class="modal-body">' + bodyHTML + '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  modalEl = overlay;
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) { closeModal(); return; }
+    var closeBtn = e.target.closest('[data-action="close-modal"]');
+    if (closeBtn) closeModal();
+  });
+
+  var panel = overlay.querySelector('.modal-panel');
+  panel.focus();
+
+  onModalKeydown = function (e) { if (e.key === 'Escape') closeModal(); };
+  document.addEventListener('keydown', onModalKeydown);
+}
+
+function closeModal() {
+  if (!modalEl) return;
+  document.body.style.overflow = previousOverflow;
+  if (onModalKeydown) { document.removeEventListener('keydown', onModalKeydown); onModalKeydown = null; }
+  modalEl.remove();
+  modalEl = null;
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+
+function startWizard() {
+  state.answers = {};
+  state.stepIndex = 0;
+  state.view = 'wizard';
+  closeModal();
+  render();
+}
+
+function goHome() {
+  state.answers = {};
+  state.stepIndex = 0;
+  state.view = 'landing';
+  closeModal();
+  render();
+}
+
+function wizardBack() {
+  var cur = currentStepIndex();
+  if (cur > 0) { state.stepIndex = cur - 1; render(); }
+}
+
+function wizardNext() {
+  var qs = activeQuestions();
+  var cur = currentStepIndex();
+  var q = qs[cur];
+  if (!isAnswered(q)) return;
+  if (cur === qs.length - 1) { state.view = 'results'; }
+  else { state.stepIndex = cur + 1; }
+  render();
+}
+
+function gotoStep(i) {
+  var cur = currentStepIndex();
+  if (i <= cur) { state.stepIndex = i; render(); }
+}
+
+function selectOption(qid, rawValue) {
+  var q = QUESTIONS.filter(function (q) { return q.id === qid; })[0];
+  var opt = q.options.filter(function (o) { return String(o.value) === rawValue; })[0];
+  state.answers[qid] = opt.value;
+  render();
+}
+
+function selectAndAdvance(qid, rawValue) {
+  var q = QUESTIONS.filter(function (q) { return q.id === qid; })[0];
+  var opt = q.options.filter(function (o) { return String(o.value) === rawValue; })[0];
+  state.answers[qid] = opt.value;
+  var qs = activeQuestions();
+  var cur = Math.min(state.stepIndex, qs.length - 1);
+  if (cur === qs.length - 1) { state.view = 'results'; }
+  else { state.stepIndex = cur + 1; }
+  render();
+}
+
+function patchAnsweredState() {
+  var qs = activeQuestions();
+  var idx = currentStepIndex();
+  var q = qs[idx];
+  var answered = isAnswered(q);
+  var nextBtn = document.querySelector('#root .nav-buttons .btn.primary');
+  if (nextBtn) nextBtn.disabled = !answered;
+  var dot = document.querySelector('#root .dot[data-index="' + idx + '"]');
+  if (dot) dot.classList.toggle('done', answered);
+}
+
+// ============================================================
+// EVENT DELEGATION
+// ============================================================
+
+var root = document.getElementById('root');
+
+root.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-action]');
+  if (!el) return;
+  var action = el.dataset.action;
+  if (action === 'start-wizard') startWizard();
+  else if (action === 'go-home') goHome();
+  else if (action === 'select-option') selectOption(el.dataset.qid, el.dataset.value);
+  else if (action === 'goto-step') gotoStep(Number(el.dataset.index));
+  else if (action === 'wizard-back') wizardBack();
+  else if (action === 'wizard-next') wizardNext();
+  else if (action === 'edit-answers') { state.view = 'wizard'; render(); }
+  else if (action === 'print') window.print();
+  else if (action === 'open-diagram') {
+    if (state.view === 'results') {
+      var result = assess(state.answers);
+      var name = (state.answers.apiName || '').trim() || 'Unnamed API';
+      openModal('Decision path — ' + name, renderDiagram(result));
+    } else {
+      openModal('How the decision tree works', renderDiagram(null));
+    }
+  }
+});
+
+root.addEventListener('dblclick', function (e) {
+  var el = e.target.closest('[data-action="select-option"]');
+  if (!el) return;
+  selectAndAdvance(el.dataset.qid, el.dataset.value);
+});
+
+root.addEventListener('input', function (e) {
+  if (e.target.matches('[data-field="apiName"]')) {
+    state.answers.apiName = e.target.value;
+    patchAnsweredState();
+  } else if (e.target.matches('[data-field="apiDescription"]')) {
+    state.answers.apiDescription = e.target.value;
+  }
+});
+
+root.addEventListener('keydown', function (e) {
+  if (e.target.matches('[data-field="apiName"]') && e.key === 'Enter') {
+    wizardNext();
+  }
+});
+
+// ============================================================
+// MOUNT
+// ============================================================
+
+render();
+
+})();
+</script>
+</body>
+</html>
